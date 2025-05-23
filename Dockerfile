@@ -47,3 +47,9 @@ RUN ./add-ttyd.sh
 # remove ttyd to avoid people tampering with the installation
 RUN rm add-ttyd.sh
 RUN rm -rf ttyd
+
+# this is where we will be cloning the repository to work with
+
+# clone the repository
+RUN git clone https://github.com/hackclub/terminalcraft.git
+RUN cd terminalcraft
