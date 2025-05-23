@@ -23,9 +23,17 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 # END install the rust compiler
 
 # install ruby runtime
-RUN sudo apt-get install ruby-full
+RUN apt-get -y install ruby-full
 
 # END install ruby runtime
+
+# install ttyd - this will help us eventually expose the terminal via a web interface
+RUN git clone https://github.com/tsl0922/ttyd.git
+RUN cd ttyd && mkdir build && cd build
+RUN cmake ..
+RUN make && make install
+
+# END install ttyd
 
 WORKDIR /app
 
