@@ -1,7 +1,11 @@
 FROM ubuntu:22.04
 
+# update apt and install essential packages
+RUN apt-get update 
+RUN apt-get install -y build-essential cmake git libjson-c-dev libwebsockets-dev
+
 # install the python runtime and pip
-RUN apt-get update && apt-get install -y python3 python3-pip
+RUN apt-get install -y python3 python3-pip
 
 # END install python runtime
 
