@@ -10,10 +10,12 @@ RUN apt-get install -y python3 python3-pip
 # END install python runtime
 
 # install node.js - https://nodejs.org/en/download (v22.16.0, Linux, nvm)
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
-RUN \. "$HOME/.nvm/nvm.sh"
-RUN nvm install 22
-RUN node -v 
+RUN apt-get install -y nodejs
+RUN apt-get install -y npm
+# RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+# RUN \. "$HOME/.nvm/nvm.sh"
+# RUN nvm install 22
+# RUN node -v 
 
 # END install node.js 
 
@@ -27,14 +29,21 @@ RUN apt-get -y install ruby-full
 
 # END install ruby runtime
 
-# install ttyd - this will help us eventually expose the terminal via a web interface
-RUN git clone https://github.com/tsl0922/ttyd.git
-RUN cd ttyd && mkdir build && cd build
-RUN cmake ..
-RUN make && make install
-
-# END install ttyd
-
 WORKDIR /app
 
 COPY . .
+
+# install ttyd - this will help us eventually expose the terminal via a web interface
+# RUN git clone https://github.com/tsl0922/ttyd.git
+# RUN cd ttyd && mkdir build && cd build
+# RUN cmake ..
+# RUN make && make install
+
+# END install ttyd
+
+RUN chmod +x add-ttyd.sh
+RUN ./add-ttyd.sh 
+
+# remove ttyd to avoid people tampering with the installation
+RUN rm add-ttyd.sh
+RUN rm -rf ttyd
