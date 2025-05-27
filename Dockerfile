@@ -1,17 +1,18 @@
 FROM ubuntu:22.04
 
 # update apt and install essential packages
-RUN apt-get update 
+RUN apt-get update
 RUN apt-get install -y build-essential cmake git libjson-c-dev libwebsockets-dev
 
 # install the python runtime and pip
 RUN apt-get install -y python3 python3-pip
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # END install python runtime
 
 # install node.js - https://nodejs.org/en/download (v22.16.0, Linux, nvm)
 RUN apt-get install -y nodejs
-RUN apt-get install -y npm
+RUN apt-get install -y npm --fix-missing
 # RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
 # RUN \. "$HOME/.nvm/nvm.sh"
 # RUN nvm install 22
@@ -28,6 +29,8 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 RUN apt-get -y install ruby-full
 
 # END install ruby runtime
+
+COPY run-app.sh /run-app.sh
 
 WORKDIR /app
 
@@ -53,3 +56,9 @@ RUN rm -rf ttyd
 # clone the repository
 RUN git clone https://github.com/hackclub/terminalcraft.git
 RUN cd terminalcraft
+
+# give executable permission to this script
+RUN chmod +x /run-app.sh
+
+ENTRYPOINT [ "/run-app.sh" ]
+# CMD ./run-app.sh
