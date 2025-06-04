@@ -15,12 +15,15 @@ if [ ! -d "terminalcraft" ]; then
 fi
 
 cd terminalcraft
+git checkout test/runner
 cd "submissions/$project_name"
-ls
 
-if [ -f "pyproject.toml" ]; then
-    # this should be the main command
-    uv run main.py
-fi
+# if [ -f "pyproject.toml" ]; then
+#     this should be the main command
+#     uv run main.py &
+# fi
 
+ttyd --port 8989 -W $(cat config.json | jq -r ".run")
+
+# sleep infinity
 # should add other commands here
