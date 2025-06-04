@@ -24,7 +24,7 @@ cd "submissions/$project_name"
 # fi
 
 # run the setup command
-cat config.json | jq -r ".setup"
+$(cat config.json | jq -r ".setup")
 
 ulimit -n 65536
 ttyd --port 8989 -W $(cat config.json | jq -r ".run")
