@@ -19,3 +19,27 @@ How this is going to work
         - *If possible, the readme of the terminalcraft program will be printed 
     - Exiting the container clears it's memory
 - Containers should be cleaned up after a day of inactivity
+
+## Setting up
+
+### Requirements
+- Docker
+- Python3 and `uv` installed
+
+### Getting it to run
+1. Activate the virtual environment
+```shell
+uv venv
+```
+2. Install the dependencies with 
+```shell
+uv pip install
+```
+3. Build the Docker image
+```shell
+docker build -t jos/palm .
+```
+4. Start the server using
+```shell
+uvicorn expose:app --host 0.0.0.0
+```
