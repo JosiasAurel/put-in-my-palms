@@ -35,6 +35,10 @@ WORKDIR /app
 
 COPY . .
 
+# install jq command tool
+RUN apt-get install -y jq
+# END install jq command tool
+
 # install ttyd - this will help us eventually expose the terminal via a web interface
 # RUN git clone https://github.com/tsl0922/ttyd.git
 # RUN cd ttyd && mkdir build && cd build
@@ -61,5 +65,5 @@ RUN chmod +x /run-app.sh
 
 EXPOSE 8989
 
-# ENTRYPOINT [ "/run-app.sh" ]
+ENTRYPOINT [ "/run-app.sh" ]
 # CMD ./run-app.sh
