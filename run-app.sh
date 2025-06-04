@@ -23,6 +23,7 @@ cd "submissions/$project_name"
 #     uv run main.py &
 # fi
 
+ulimit -n 65536
 ttyd --port 8989 -W $(cat config.json | jq -r ".run")
 
 # sleep infinity
