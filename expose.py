@@ -15,7 +15,11 @@ def assign_port() -> int:
 # ProjectName:[ProjectPort, ChildProcess]
 projects_store = {}
 
-@app.get("/{project_name}")
+@app.get("/")
+def _index():
+    return "Running..."
+
+@app.get("/projects/{project_name}")
 def _run_app(project_name: str):
     project_port = 0
     # if project is already running, just return on which port the project is running
