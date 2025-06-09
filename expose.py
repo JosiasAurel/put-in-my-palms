@@ -8,8 +8,7 @@ import uvicorn
 load_dotenv()
 
 ROOT_DOMAIN = os.getenv("ROOT_DOMAIN")
-APP_PORT = os.getenv("APP_PORT")
-APP_PORT = APP_PORT if APP_PORT is not None else 8000
+APP_PORT = int(os.getenv("APP_PORT", 8000))
 
 app = FastAPI()
 
