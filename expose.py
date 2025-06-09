@@ -30,7 +30,6 @@ def regenerate_caddy_config() -> None:
         {ROOT_DOMAIN} {{
             handle {{
                 reverse_proxy localhost:{APP_PORT}
-                respond "TerminalCraft Project Demo"
             }}
         }}
     """
