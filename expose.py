@@ -1,5 +1,12 @@
 from fastapi import FastAPI
 import subprocess
+from dotenv import config
+import os
+
+# load environment variables
+config()
+
+ROOT_DOMAIN = os.getenv("ROOT_DOMAIN")
 
 app = FastAPI()
 
@@ -52,17 +59,17 @@ def _run_app(project_name: str):
 
 # this function will regenerate the caddy config based on the newly added proejct paths and their ports
 def regenerate_caddy_config() -> None:
-    caddy_config = """
-        localhost {
-            handle {
+    caddy_config = f"""
+        {ROOT_DOMAIN} {{
+            handle {{
                 respond "TerminalCraft Project Demo"
-            }
-        }
+            }}
+        }}
     """
 
     for project_name, project_info in projects_store.items():
         project_caddy_config = f"""
-        {project_name}.localhost {{
+        {project_name}.{ROOT_DOMAIN} {{
             reverse_proxy localhost:{project_info[0]}
         }}
         """
