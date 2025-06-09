@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 import subprocess
-from dotenv import config
+from dotenv import load_dotenv
 import os
 
 # load environment variables
-config()
+load_dotenv()
 
 ROOT_DOMAIN = os.getenv("ROOT_DOMAIN")
 
