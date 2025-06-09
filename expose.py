@@ -2,11 +2,14 @@ from fastapi import FastAPI
 import subprocess
 from dotenv import load_dotenv
 import os
+import uvicorn
 
 # load environment variables
 load_dotenv()
 
 ROOT_DOMAIN = os.getenv("ROOT_DOMAIN")
+APP_PORT = os.getenv("APP_PORT")
+APP_PORT = APP_PORT if APP_PORT is not None else 8000
 
 app = FastAPI()
 
@@ -81,3 +84,6 @@ def regenerate_caddy_config() -> None:
 
     # logging the newly generated caddy config soley for debugging purposes
     print(caddy_config)
+
+if __name__ == "__main__":
+    uvicorn.run("expose:app", host="0.0.0.0", port=APP_PORT, reload=True)
