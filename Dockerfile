@@ -19,6 +19,10 @@ RUN apt-get install -y npm
 
 # END install node.js 
 
+# install bun
+RUN curl -fsSL https://bun.sh/install | bash
+# END install bun
+
 # install the rust compiler
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
@@ -28,6 +32,11 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 RUN apt-get -y install ruby-full
 
 # END install ruby runtime
+
+# install golang
+RUN apt install golang-go
+
+# END install golang
 
 COPY run-app.sh /run-app.sh
 
