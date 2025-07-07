@@ -14,9 +14,8 @@ if [ ! -d "terminalcraft" ]; then
     git clone https://github.com/hackclub/terminalcraft/
 fi
 
-cd terminalcraft
-git checkout test/runner
-cd "submissions/$project_name"
+cd terminalcraft/submissions
+cd $(ls | grep -i $project_name)
 
 # if [ -f "pyproject.toml" ]; then
 #     this should be the main command

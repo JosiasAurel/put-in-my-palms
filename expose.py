@@ -37,7 +37,9 @@ def regenerate_caddy_config() -> None:
     for project_name, project_info in projects_store.items():
         project_caddy_config = f"""
         {project_name}.{ROOT_DOMAIN} {{
-            reverse_proxy localhost:{project_info[0]}
+            handle {{
+                reverse_proxy localhost:{project_info[0]}
+            }}
         }}
         """
 
@@ -66,7 +68,7 @@ def _run_app(project_name: str):
         project_ps = projects_store[project_name][1]
         # if the project has not terminated, tell the user it is still running
         if project_ps.poll() is None:
-            return { "success": True, "port": projects_store[project_name][0] } 
+            return { "success": True, "port": projects_store[project_name][0], "url": f"{project_name}.{ROOT_DOMAIN}" } 
         project_port = projects_store[project_name][0]
 
     # otherwise, assign a new port to expose the project
@@ -86,7 +88,7 @@ def _run_app(project_name: str):
 
     # regenerate caddy config such that it includes the newly added proejct
     regenerate_caddy_config()
-    return { "success": True, "port": project_port } 
+    return { "success": True, "port": project_port, "url": f"{project_name}.{ROOT_DOMAIN}" } 
 
 if __name__ == "__main__":
     uvicorn.run("expose:app", host="0.0.0.0", port=APP_PORT, reload=True)

@@ -2,7 +2,7 @@ FROM ubuntu:22.04
 
 # update apt and install essential packages
 RUN apt-get update
-RUN apt-get install -y build-essential cmake git libjson-c-dev libwebsockets-dev libncurses-dev tar mtx mt ffmpeg
+RUN apt-get install -y build-essential cmake git libjson-c-dev libwebsockets-dev libncurses-dev tar ffmpeg
 
 # install the python runtime and pip
 RUN apt-get install -y python3 python3-pip
@@ -34,7 +34,7 @@ RUN apt-get -y install ruby-full
 # END install ruby runtime
 
 # install golang
-RUN apt install golang-go
+RUN apt install -y golang-go
 
 # END install golang
 
