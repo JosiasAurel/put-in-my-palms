@@ -39,10 +39,15 @@ RUN apt install -y golang-go
 # END install golang
 
 COPY run-app.sh /run-app.sh
-
 WORKDIR /app
 
 COPY . .
+
+RUN groupadd -r hackclubber && useradd -r -g hackclubber --no-create-home --shell /bin/bash hackclubber
+RUN mkdir -p /etc/sudoers.d && \
+    echo "myuser ALL=(ALL) NOPASSWD: /usr/bin/apt, /usr/bin/apt-get" >> /etc/sudoers.d/myuser && \
+    chmod 0440 /etc/sudoers.d/myuser
+RUN chown -R hackclubber:hackclubber /app
 
 # install jq command tool
 RUN apt-get install -y jq
@@ -73,6 +78,8 @@ RUN cd terminalcraft
 RUN chmod +x /run-app.sh
 
 EXPOSE 8989
+
+USER hackclubber
 
 ENTRYPOINT [ "/run-app.sh" ]
 # CMD ./run-app.sh
