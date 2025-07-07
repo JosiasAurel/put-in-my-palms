@@ -24,22 +24,51 @@ How this is going to work
 
 ### Requirements
 - Docker
-- Python3 and `uv` installed
+- Python3 
+- caddy-server 
 
 ### Getting it to run
-1. Activate the virtual environment
+1. Install the dependencies with 
 ```shell
-uv venv
+pip3 install -r requirements.txt --break-system-packages
 ```
-2. Install the dependencies with 
-```shell
-uv pip install
-```
-3. Build the Docker image
+2. Build the Docker image
 ```shell
 docker build -t jos/palm .
 ```
-4. Start the server using
+3. Set environment variables
+Replace `ROOT_DOMAIN` with the root domain you want to use and `APP_PORT`.
+- Set A record `terminalcraft.josiasw.dev` that points to the IP of your service
+- Set an A record that points to the IP of your server. e.g A | `*.terminalcraft.josiasw.dev` 192.168.2.111
+```
+ROOT_DOMAIN=terminalcraft.josiasw.dev
+APP_PORT=8001
+```
+3. Start the server using
 ```shell
-uvicorn expose:app --host 0.0.0.0
+python3 expose.py
+```
+4. Start caddy server in watch mode
+```shell 
+caddy run --watch
+```
+
+## Usage
+```
+GET terminalcraft.josiasw.dev/projects/<project-name>
+^ This will start a new Docker container and expose to the internet under <project-name>.terminalcraft.josiasw.dev (or whatever <project-name>.your-subdomain.tld)
+```
+
+```
+Navigating to <project-name>.your-subdomain.tld will start a session and connect to that Docker container for your usage
+```
+
+## Configuring an app for this
+
+Create a `config.json` in the root of the project folder with the following structure
+```json
+{
+    "setup": "single command to setup the project and install dependencies",
+    "run": "command to run the project"
+}
 ```
