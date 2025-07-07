@@ -38,6 +38,12 @@ RUN apt install -y golang-go
 
 # END install golang
 
+# install lua5.4, luajit
+RUN apt install -y luajit
+RUN apt install -y lua5.4
+
+# END install lua5.4, luajit
+
 COPY run-app.sh /run-app.sh
 
 WORKDIR /app
