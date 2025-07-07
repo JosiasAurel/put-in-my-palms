@@ -6,7 +6,7 @@ How this is going to work
 
 - A linux container
 - All the languages that I expect Hack Clubbers to use to develop their TerminalCraft projects in
-    - Ruby, Python, C/C++, Rust, JavaScript/Node.js, Java, C# (dotnet)
+    - Ruby, Python, C/C++, Rust, JavaScript/Node.js, Java, C# (dotnet), Lua 5.4, LuaJIT
 - The container is going to take as argument 
     - full url to project it has to clone from PR or folder in the terminalcraft repository
         - could even be just the branch name it has to checkout out to and commit hash/HEAD
