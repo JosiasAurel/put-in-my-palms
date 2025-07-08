@@ -39,6 +39,10 @@ def regenerate_caddy_config() -> None:
         {project_name}.{ROOT_DOMAIN} {{
             handle {{
                 reverse_proxy localhost:{project_info[0]}
+                header {{
+                    -X-Frame-Options
+                    Content-Security-Policy "frame-ancestors *"
+                }}
             }}
         }}
         """
