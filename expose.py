@@ -47,6 +47,11 @@ def regenerate_caddy_config() -> None:
                 header {{
                     -X-Frame-Options
                     Content-Security-Policy "frame-ancestors *"
+                    Access-Control-Allow-Origin "*"
+                    Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+                    Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization"
+                    Access-Control-Allow-Credentials false
+                    Access-Control-Max-Age 3600
                 }}
             }}
         }}
