@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import subprocess
 from dotenv import load_dotenv
 import os
@@ -11,6 +12,10 @@ ROOT_DOMAIN = os.getenv("ROOT_DOMAIN")
 APP_PORT = int(os.getenv("APP_PORT", 8000))
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+)
 
 LAST_PORT = 8080
 
@@ -68,14 +73,14 @@ def _run_app(project_name: str):
         project_ps = projects_store[project_name][1]
         # if the project has not terminated, tell the user it is still running
         if project_ps.poll() is None:
-            return { "success": True, "port": projects_store[project_name][0], "url": f"{project_name}.{ROOT_DOMAIN}" } 
+            return { "success": True, "port": projects_store[project_name][0], "url": f"{project_name}.{ROOT_DOMAIN}" }
         project_port = projects_store[project_name][0]
 
     # otherwise, assign a new port to expose the project
     if project_port == 0:
         project_port = assign_port()
     # will reuse the port this project was using before
-    
+
     print("Will be running on port", project_port)
     run_cmd = f"docker run -p {project_port}:8989 jos/palm {project_name}"
     ps = subprocess.Popen(run_cmd.split(" "))
@@ -88,7 +93,7 @@ def _run_app(project_name: str):
 
     # regenerate caddy config such that it includes the newly added proejct
     regenerate_caddy_config()
-    return { "success": True, "port": project_port, "url": f"{project_name}.{ROOT_DOMAIN}" } 
+    return { "success": True, "port": project_port, "url": f"{project_name}.{ROOT_DOMAIN}" }
 
 if __name__ == "__main__":
     uvicorn.run("expose:app", host="0.0.0.0", port=APP_PORT, reload=True)
