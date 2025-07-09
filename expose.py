@@ -76,6 +76,8 @@ def _index():
 
 @app.get("/projects/{project_name}")
 def _run_app(project_name: str):
+    if not is_urlsafe(project_name):
+        return { "success": False }
     project_port = 0
     # if project is already running, just return on which port the project is running
     if project_name in projects_store.keys():
@@ -103,6 +105,19 @@ def _run_app(project_name: str):
     # regenerate caddy config such that it includes the newly added proejct
     regenerate_caddy_config()
     return { "success": True, "port": project_port, "url": f"{project_name}.{ROOT_DOMAIN}" }
+
+def is_urlsafe(name: str) -> bool:
+    return all([
+        not name.startswith("-"),
+        not name.endswith("-"),
+        "_" not in name,
+        "!" not in name,
+        " " not in name,
+        "@" not in name,
+        ".." not in name,
+        "#" not in name
+    ])
+
 
 if __name__ == "__main__":
     uvicorn.run("expose:app", host="0.0.0.0", port=APP_PORT, reload=True)
