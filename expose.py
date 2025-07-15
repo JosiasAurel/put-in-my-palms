@@ -4,18 +4,20 @@ import subprocess
 from dotenv import load_dotenv
 import os
 import uvicorn
+from contextlib import asynccontextmanager
+import redis
 
 # load environment variables
 load_dotenv()
 
 ROOT_DOMAIN = os.getenv("ROOT_DOMAIN")
 APP_PORT = int(os.getenv("APP_PORT", 8000))
+REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
+REDIS_DB = int(os.getenv("REDIS_DB", 0))
 
-app = FastAPI()
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-)
+redis_client = redis.Redis(port=REDIS_PORT, db=REDIS_DB)
+
+
 
 LAST_PORT = 8080
 
@@ -65,10 +67,17 @@ def regenerate_caddy_config() -> None:
     # logging the newly generated caddy config soley for debugging purposes
     print(caddy_config)
 
-@app.on_event("startup")
-async def startup_event():
-    # generate a baseline caddy config on startup so the caddy server can run this bad boy
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     regenerate_caddy_config()
+    yield
+
+app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    lifespan=lifespan
+)
 
 @app.get("/")
 def _index():
