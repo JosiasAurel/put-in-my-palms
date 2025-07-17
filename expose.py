@@ -6,6 +6,7 @@ import uvicorn
 from contextlib import asynccontextmanager
 import docker
 import random
+import socket
 
 # load environment variables
 load_dotenv()
