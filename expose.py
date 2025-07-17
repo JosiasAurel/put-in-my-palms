@@ -5,6 +5,7 @@ import os
 import uvicorn
 from contextlib import asynccontextmanager
 import docker
+import random
 
 # load environment variables
 load_dotenv()
@@ -21,9 +22,21 @@ def get_palms_containers():
 def get_container_port(container) -> int:
     return int(container.attrs["HostConfig"]["PortBindings"]["8989/tcp"][0]["HostPort"])
 
+def is_port_in_use(port, host="127.0.0.1"):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.settimeout(1)
+        result = s.connect_ex((host, port))
+        return result == 0
+
 # naive approach to selecting another port to use
 def suggest_container_port():
     used_ports = list(map(lambda container: get_container_port(container), docker_client.containers.list()))
+    if len(used_ports) == 0:
+        suggested_port = 0
+        while True:
+            suggested_port = random.randint(APP_PORT + 1, 9999)
+            if not is_port_in_use(suggested_port): break
+    # it should be able to pick a port that is not yet used on the machine
     return max(used_ports) + 1
 
 # this function will regenerate the caddy config based on the newly added proejct paths and their ports
