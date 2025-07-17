@@ -65,7 +65,7 @@ Navigating to <project-name>.your-subdomain.tld will start a session and connect
 
 ## Configuring an app for this
 
-Create a `config.json` in the root of the project folder with the following structure
+Create a `palms.json` in the root of the project folder with the following structure
 ```json
 {
     "setup": "single command to setup the project and install dependencies",

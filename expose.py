@@ -1,9 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import subprocess
 from dotenv import load_dotenv
 import os
 import uvicorn
+from contextlib import asynccontextmanager
+import docker
 
 # load environment variables
 load_dotenv()
@@ -11,23 +12,19 @@ load_dotenv()
 ROOT_DOMAIN = os.getenv("ROOT_DOMAIN")
 APP_PORT = int(os.getenv("APP_PORT", 8000))
 
-app = FastAPI()
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-)
+docker_client = docker.from_env()
 
-LAST_PORT = 8080
+def get_palms_containers():
+    palms_containers = list(filter(lambda container: "palms-" in container, docker_client.containers.list()))
+    return palms_containers
 
-# we're assigning ports in increments of 1 starting from 8080
-def assign_port() -> int:
-    global LAST_PORT
-    LAST_PORT += 1
-    return LAST_PORT
+def get_container_port(container) -> int:
+    return int(container.attrs["HostConfig"]["PortBindings"]["8989/tcp"][0]["HostPort"])
 
-# project store has the form
-# ProjectName:[ProjectPort, ChildProcess]
-projects_store = {}
+# naive approach to selecting another port to use
+def suggest_container_port():
+    used_ports = list(map(lambda container: get_container_port(container), docker_client.containers.list()))
+    return max(used_ports) + 1
 
 # this function will regenerate the caddy config based on the newly added proejct paths and their ports
 def regenerate_caddy_config() -> None:
@@ -39,36 +36,42 @@ def regenerate_caddy_config() -> None:
         }}
     """
 
-    for project_name, project_info in projects_store.items():
+    for container in get_palms_containers():
+        container_port = get_container_port(container)
+        project_name = container.name.split("-")[1]
         project_caddy_config = f"""
-        {project_name}.{ROOT_DOMAIN} {{
-            handle {{
-                reverse_proxy localhost:{project_info[0]}
-                header {{
-                    -X-Frame-Options
-                    Content-Security-Policy "frame-ancestors *"
-                    Access-Control-Allow-Origin "*"
-                    Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
-                    Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization"
-                    Access-Control-Allow-Credentials false
-                    Access-Control-Max-Age 3600
+            {project_name}.{ROOT_DOMAIN} {{
+                handle {{
+                    reverse_proxy localhost:{container_port}
+                    header {{
+                        -X-Frame-Options
+                        Content-Security-Policy "frame-ancestors *"
+                        Access-Control-Allow-Origin "*"
+                        Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+                        Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization"
+                        Access-Control-Allow-Credentials false
+                        Access-Control-Max-Age 3600
+                    }}
                 }}
             }}
-        }}
         """
 
         caddy_config += project_caddy_config
 
-    with open('Caddyfile', "w") as config_f:
+    with open("Caddyfile", "w") as config_f:
         config_f.write(caddy_config)
 
-    # logging the newly generated caddy config soley for debugging purposes
-    print(caddy_config)
-
-@app.on_event("startup")
-async def startup_event():
-    # generate a baseline caddy config on startup so the caddy server can run this bad boy
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     regenerate_caddy_config()
+    yield
+
+app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    lifespan=lifespan
+)
 
 @app.get("/")
 def _index():
@@ -78,33 +81,16 @@ def _index():
 def _run_app(project_name: str):
     if not is_urlsafe(project_name):
         return { "success": False }
-    project_port = 0
-    # if project is already running, just return on which port the project is running
-    if project_name in projects_store.keys():
-        project_ps = projects_store[project_name][1]
-        # if the project has not terminated, tell the user it is still running
-        if project_ps.poll() is None:
-            return { "success": True, "port": projects_store[project_name][0], "url": f"{project_name}.{ROOT_DOMAIN}" }
-        project_port = projects_store[project_name][0]
 
-    # otherwise, assign a new port to expose the project
-    if project_port == 0:
-        project_port = assign_port()
-    # will reuse the port this project was using before
+    try:
+        docker_client.containers.get("palms-" + project_name) 
+    except docker.errors.NotFound:
+        container_port = suggest_container_port()
+        docker_client.containers.run("jos/palm", name="palms-" + project_name, ports={"8989/tcp": container_port }, command=project_name, detach=True)
 
-    print("Will be running on port", project_port)
-    run_cmd = f"docker run -p {project_port}:8989 jos/palm {project_name}"
-    ps = subprocess.Popen(run_cmd.split(" "))
-    print("running command")
-    print(run_cmd)
-    # print(ps)
-
-    # after the project has been started, add it to the in-memory store
-    projects_store[project_name] = [project_port, ps]
-
-    # regenerate caddy config such that it includes the newly added proejct
     regenerate_caddy_config()
-    return { "success": True, "port": project_port, "url": f"{project_name}.{ROOT_DOMAIN}" }
+
+    return { "success": True, "url": f"{project_name}.{ROOT_DOMAIN}" }
 
 def is_urlsafe(name: str) -> bool:
     return all([
