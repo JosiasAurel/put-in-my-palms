@@ -37,6 +37,7 @@ def suggest_container_port():
         while True:
             suggested_port = random.randint(APP_PORT + 1, 9999)
             if not is_port_in_use(suggested_port): break
+        return suggested_port
     # it should be able to pick a port that is not yet used on the machine
     return max(used_ports) + 1
 
