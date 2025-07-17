@@ -66,11 +66,11 @@ async def lifespan(app: FastAPI):
     regenerate_caddy_config()
     yield
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    lifespan=lifespan
 )
 
 @app.get("/")
