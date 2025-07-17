@@ -17,7 +17,7 @@ APP_PORT = int(os.getenv("APP_PORT", 8000))
 docker_client = docker.from_env()
 
 def get_palms_containers():
-    palms_containers = list(filter(lambda container: "palms-" in container, docker_client.containers.list()))
+    palms_containers = list(filter(lambda container: "palms-" in container.name, docker_client.containers.list()))
     return palms_containers
 
 def get_container_port(container) -> int:
