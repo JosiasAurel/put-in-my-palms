@@ -53,7 +53,7 @@ def regenerate_caddy_config() -> None:
 
     for container in get_palms_containers():
         container_port = get_container_port(container)
-        project_name = container.name.split("-")[1]
+        project_name = container.name[len("palms-"):]
         project_caddy_config = f"""
             {project_name}.{ROOT_DOMAIN} {{
                 handle {{
